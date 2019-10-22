@@ -501,12 +501,12 @@ def dispatch(intent_request):
     Called when the user specifies an intent for this bot.
     """
 
-    logger.debug('dispatch userId={}, intentName={}'.format(intent_request['userId'], intent_request['currentIntent']['name']))
+    # logger.debug('dispatch userId={}, intentName={}'.format(intent_request['userId'], intent_request['currentIntent']['name']))
 
     intent_name = intent_request['currentIntent']['name']
 
     # Dispatch to your bot's intent handlers
-    if intent_name == 'BookHotel':
+    if intent_name == 'amount':
         return payment(intent_request)
     if intent_name == 'BookHotel':
         return book_hotel(intent_request)
@@ -527,10 +527,10 @@ def lambda_handler(event, context):
     # By default, treat the user request as coming from the America/New_York time zone.
     os.environ['TZ'] = 'America/New_York'
     time.tzset()
-    logger.debug('sk is printing')
+    logger.debug('sk is printing event')
     logger.debug(event)
+    logger.debug('sk is printing context')
     logger.debug(context)
     
-    # logger.debug('event.bot.name={}'.format(event['bot']['name']))
 
     return dispatch(event)
