@@ -258,8 +258,9 @@ def validate_hotel(slots):
 """ --- Functions that control the bot's behavior --- """
 
 def payment(intent_request):
+    session_attributes = intent_request['sessionAttributes'] if intent_request['sessionAttributes'] is not None else {}
     return close(
-        '',
+        session_attributes,
         'Fulfilled',
         {
             'contentType': 'PlainText',
@@ -506,7 +507,7 @@ def dispatch(intent_request):
     intent_name = intent_request['currentIntent']['name']
 
     # Dispatch to your bot's intent handlers
-    if intent_name == 'amount':
+    if intent_name == 'payments':
         return payment(intent_request)
     if intent_name == 'BookHotel':
         return book_hotel(intent_request)
