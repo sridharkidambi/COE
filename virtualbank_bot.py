@@ -287,7 +287,7 @@ def payment(intent_request):
             'Fulfilled',
             {
                 'contentType': 'PlainText',
-                'content': 'Thanks, Your payment for amount $' +  amount+' is made.   Please let me know if you would like to do onother transaction '
+                'content': 'Thanks, Your payment for amount $' +  amount+' is made for the account ending with **' +  creditcardnum +'   Please let me know if you would like to do onother transaction '
                         
             }
         )
