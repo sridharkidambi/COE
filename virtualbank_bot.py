@@ -259,15 +259,39 @@ def validate_hotel(slots):
 
 def payment(intent_request):
     session_attributes = intent_request['sessionAttributes'] if intent_request['sessionAttributes'] is not None else {}
-    return close(
-        session_attributes,
-        'Fulfilled',
-        {
-            'contentType': 'PlainText',
-            'content': 'Thanks, Your payment is made.   Please let me know if you would like to do onother transaction '
-                       
-        }
-    )
+    slots=intent_request['currentIntent']['slots']
+    amount = try_ex(lambda: intent_request['currentIntent']['slots']['amount'])
+    balanceoption = try_ex(lambda: intent_request['currentIntent']['slots']['balanceoption'])
+    creditcardnum = try_ex(lambda: intent_request['currentIntent']['slots']['creditcardnum'])
+    option = try_ex(lambda: intent_request['currentIntent']['slots']['option'])
+    validation_result=build_validation_result(False,'option','choose your Service Options: 1. pay your bill 2.view transactions')
+    logger.debug('printing logs')
+    logger.debug(validation_result)
+    # validation_result['violatedSlot']="creditcardnum"
+    # validation_result['message']="choose your account number"
+    # slots[validation_result['violatedSlot']] = None
+    if (option is None or option =='') :
+        return elicit_slot(
+                    session_attributes,
+                    intent_request['currentIntent']['name'],
+                    slots,
+                    validation_result['violatedSlot'],
+                    validation_result['message']
+                )
+
+    if (option is not None and creditcardnum is None ) :
+        return delegate(session_attributes, intent_request['currentIntent']['slots'])
+    if(balanceoption is not None and amount is not None ):
+        return close(
+            session_attributes,
+            'Fulfilled',
+            {
+                'contentType': 'PlainText',
+                'content': 'Thanks, Your payment is made.   Please let me know if you would like to do onother transaction '
+                        
+            }
+        )
+    return delegate(session_attributes, intent_request['currentIntent']['slots'])
 def book_hotel(intent_request):
     """
     Performs dialog management and fulfillment for booking a hotel.
