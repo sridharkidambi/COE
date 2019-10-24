@@ -263,16 +263,12 @@ def payment(intent_request):
     amount = try_ex(lambda: intent_request['currentIntent']['slots']['amount'])
     creditcardnum = try_ex(lambda: intent_request['currentIntent']['slots']['creditcardnum'])
     balanceoption = try_ex(lambda: intent_request['currentIntent']['slots']['balanceoption'])
-    confirmationstatus = try_ex(lambda: intent_request['currentIntent']['confirmationStatus'])
+    confirmationstatus = try_ex(lambda: intent_request['currentIntent']['slots']['confirmationstatus'])
     
     option = try_ex(lambda: intent_request['currentIntent']['slots']['option'])
     validation_result=build_validation_result(False,'option','choose your Service Options: 1. pay your bill 2.view transactions')
-    logger.debug('printing confirmationstatus')
-    logger.debug(balanceoption)
-    logger.debug(amount)
-    logger.debug(confirmationstatus)
-    logger.debug(confirmationstatus is None)
-    logger.debug(confirmationstatus=='None')
+    logger.debug('printing logs')
+    logger.debug(validation_result)
     # validation_result['violatedSlot']="creditcardnum"
     # validation_result['message']="choose your account number"
     # slots[validation_result['violatedSlot']] = None
@@ -291,53 +287,28 @@ def payment(intent_request):
     if(balanceoption is not None and balanceoption =='totalbalance' ):
         amount='1000'
         intent_request['currentIntent']['slots']['amount']=amount
-
-    if(balanceoption is not None and balanceoption =='actualbalance' ):
+    
+    if(balanceoption is not None and balanceoption =='currentbalance' ):
         amount='250'
         intent_request['currentIntent']['slots']['amount']=amount
     
-    if(balanceoption is not None and amount is not None and confirmationstatus == 'None'):
-        session_attributes = {"confirmationContext": "AutoPopulate"} # validation_result['message']= 'are you sure to make a payment of amount ' + {amount} +'. for the credit card {creditcardnum} with confirmation?' + confirmationstatus
-        validation_result['message']= 'are you sure to proceed with the payment?' 
+    if(balanceoption is not None and amount is not None and confirmationstatus != 'yes'):
+        # validation_result['message']= 'are you sure to make a payment of amount ' + {amount} +'. for the credit card {creditcardnum} with confirmation?' + confirmationstatus
+        validation_result['message']= 'are you sure to make a payment of amount?' 
         return confirm_intent(
                     session_attributes,
                     intent_request['currentIntent']['name'],
                     slots,
-                    {
-                            'contentType': 'PlainText',
-                            'content': 'are you sure to make a payment of amount $'+ amount + ' for the credit card endig with XXXX-' + creditcardnum
-                    }
-                    
-                 )
-        # return elicit_slot(
-        #             session_attributes,
-        #             intent_request['currentIntent']['name'],
-        #             slots,
-        #             'confirmationstatus',
-        #             {
-        #                     'contentType': 'PlainText',
-        #                     'content': 'are you sure to make a payment of amount $'+ amount + ' for the credit card endig with XXXX-' + creditcardnum
-        #             }
-                    
-        #          )
+                    validation_result['message']
+                )
 
-    if(balanceoption is not None and amount is not None and confirmationstatus =='Confirmed'):
+    if(balanceoption is not None and amount is not None and confirmationstatus == 'yes'):
         return close(
             session_attributes,
             'Fulfilled',
             {
                 'contentType': 'PlainText',
                 'content': 'Thanks, Your payment for amount $' +  amount+' is made for the account ending with **' +  creditcardnum +'   Please let me know if you would like to do onother transaction '
-                        
-            }
-        )
-    elif (balanceoption is not None and amount is not None and confirmationstatus !='Confirmed'):
-        return close(
-            session_attributes,
-            'Fulfilled',
-            {
-                'contentType': 'PlainText',
-                'content': 'Your payment is cancelled '
                         
             }
         )
